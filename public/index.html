@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>uData</title>
+    <met charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+  <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="span8">
+          <form class="form-inline">
+            <legend>Map</legend>
+            <div class="control-group">
+              <input class="input-small" type="text" placeholder="Key" pattern=".+" required>
+              <input class="input-small" type="text" placeholder="Value">
+              <div class="btn-group">
+                <button type="button" class="btn">Get</button>
+                <button type="button" class="btn">Set</button>
+                <button type="button" class="btn">Delete</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <button type="button" class="btn">List</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span8">
+          <form class="form-horizontal">
+            <legend>Database</legend>
+            <div class="control-group">
+              <div class="input-append">
+                <textarea rows="3" class="span6" placeholder="SQL"></textarea>
+                <button type="button" class="btn">Query</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <button type="button" class="btn">Schema</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span8">
+          <form class="form-inline">
+            <legend>Push</legend>
+            <div class="control-group">
+              <div class="input-append">
+                <input class="input-small span6" type="text" placeholder="Push URL" required>
+                <button type="button" class="btn">Push</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span8">
+          <form class="form-inline">
+            <legend>Reply</legend>
+            <textarea id="reply" class="input-block-level" rows="10" disabled></textarea>
+        </div>
+      </div>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" type="text/javascript"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+  var namespace = "com.example.nosql",
+    key = $("input[placeholder=Key]"),
+    value = $("input[placeholder=Value]"),
+    sql = $("textarea[placeholder=SQL]"),
+    pushurl = $("input[placeholder='Push URL']");
+
+  function successfunc(data) {
+    console.log("Retrieved: " + data)
+    $("#reply").text(JSON.stringify(data))
+  }
+
+  function errorfunc(err) {
+    console.log("Error: " + JSON.stringify(err))
+    $("#reply").text(err.responseText)
+  }
+
+  $("button:contains('Get')").click(function() {
+    $.ajax({url: "/api/map/" + key.val(),
+        type: "GET",
+        headers: {"X-udata-namespace": namespace},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  $("button:contains('Set')").click(function() {
+    $.ajax({url: "/api/map/" + key.val(),
+        type: "POST",
+        headers: {"X-udata-namespace": namespace},
+        data: {value: value.val()},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  $("button:contains('Delete')").click(function() {
+    $.ajax({url: "/api/map/" + key.val(),
+        type: "DELETE",
+        headers: {"X-udata-namespace": namespace},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  $("button:contains('List')").click(function() {
+    $.ajax({url: "/api/map",
+        type: "GET",
+        headers: {"X-udata-namespace": namespace},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  $("button:contains('Query')").click(function() {
+    $.ajax({url: "/api/db",
+        type: "POST",
+        data: {sql: sql.val()},
+        headers: {"X-udata-namespace": namespace},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  $("button:contains('Schema')").click(function() {
+    $.ajax({url: "/api/db/schema",
+        type: "GET",
+        headers: {"X-udata-namespace": namespace},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  $("button:contains('Push')").click(function() {
+    $.ajax({url: "/push",
+        type: "POST",
+        headers: {"X-udata-push-url": pushurl.val()},
+        success: successfunc,
+        error: errorfunc})
+  })
+
+  var evtSource = new EventSource("/api/event/request");
+  evtSource.addEventListener("request", function(e) {
+    var obj = JSON.parse(e.data)
+    console.log("EVENT " + JSON.stringify(obj))
+  })
+
+})
+</script>
+
+  </body>
+</html>
