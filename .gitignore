@@ -1,0 +1,6 @@
+.gitignore
+*~
+*.swp
+node_modules/
+npm-debug.log
+*.zip
