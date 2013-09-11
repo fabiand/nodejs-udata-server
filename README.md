@@ -71,7 +71,10 @@ Hands on
 
 To run the reference implementation do:
 
-    NODE_PATH=/usr/lib/node_modules/ node lib/app.js
+    yum install nodejs-express nodejs-sqlite3
+    npm link express
+    npm link sqlite3
+    node lib/app.js
 
 And point your browser to the [webinterface](http://127.0.0.1:3000).
 
