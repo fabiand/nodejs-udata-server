@@ -1,0 +1,91 @@
+udatahub Specification
+======================
+Fabian Deutsch
+v0.1, 2013-09
+:doctype: book
+
+[preface]
+Preface
+-------
+Our - Your - data is currently stored there where you create or post it.
+
+Intention
+---------
+With this document we try to specify a way to give you the control over
+* who accesses your data
+* and where your data is stored
+
+API
+---
+
+Transport
+~~~~~~~~~
+Transport is done over HTTP.
+
+Versioning
+~~~~~~~~~~
+The API is versioned.
+
+HTTP Requests
+~~~~~~~~~~~~~
+
+.Common HTTP headers
+[options="header"]
+|======================================
+| Request Header         | Description | Usage
+| x-udata-namespace      | Namespace | The namespace of where to operate
+| x-udata-signature      | HMAC-SHA signature of your request to auhtorize the requestee
+| x-udata-path-override  | Override the URL path to hide the URL
+|======================================
+
+
+Feature publishing
+~~~~~~~~~~~~~~~~~~
+
+.Feature structure
+---------------------------------------------------------------------
+  <features>
+    <feature>
+      <id>map</id>
+      <limits>
+          <key-length>1024</key-length>
+          <value-length>2048</value-length>
+      </limits>
+    <feature>
+    <feature>
+      <id>object</id>
+      <limits>
+        <container>
+          <number-of-objects>1024</number-of-objects>
+        </container>
+        <object>
+          <metadata-length>2048</metadata-length>
+        </object>
+      </limits>
+    <feature>
+  </features>
+---------------------------------------------------------------------
+
+
+Data access patterns
+--------------------
+
+Map
+~~~
+TBD
+
+Object
+~~~~~~
+TBD
+
+SQL
+~~~
+TBD
+
+Filesystem
+~~~~~~~~~~
+TBD
+
+Events
+~~~~~~
+TBD
