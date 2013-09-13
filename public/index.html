@@ -10,11 +10,11 @@
   </head>
   <body>
 
-    <div style="position: fixed; width: 200px; height: 200px; right: 100px; top: -10px" class="well">
+    <!--div style="position: fixed; width: 200px; height: 200px; right: 100px; top: -10px" class="well">
       <div class="container">
         <p class="text-muted" id="reply"></p>
       </div>
-    </div>
+    </div-->
 
     <div class="container">
       <div class="row">
@@ -67,11 +67,13 @@
             <div class="control-group">
               <div class="input-append">
                 <textarea rows="3" class="span6" placeholder="SQL"></textarea>
-                <button type="button" class="btn">Query</button>
+                <button type="button" class="btn">Query w/ Results</button>
+                <button type="button" class="btn">Batch Query</button>
               </div>
             </div>
             <div class="control-group">
               <button type="button" class="btn">Schema</button>
+              <button type="button" class="btn">Delete Database</button>
             </div>
           </form>
         </div>
@@ -110,113 +112,88 @@ $(document).ready(function() {
 
   function errorfunc(err) {
     console.log("Error: " + JSON.stringify(err))
-    $("#reply").text(err.responseText)
+    console.log(err)
+    $("#reply").text(err)
   }
 
-  var api = udata.API(),
-    connection = api.create_connection();
+  function cbfunc(err, data) {
+    if (err) errorfunc(err)
+    else successfunc(data)
+  }
+
+  var api = udata.API();
+
+  var connection = api.create_connection("/", namespace, "apikey", function(opts, cb) {
+    opts.success = function(data) cb(undefined, data)
+    opts.error = function(xhr, err, errt) cb(errt)
+    $.ajax(opts)
+  });
+
+  var map = connection.map();
   $("button:contains('Get')").click(function() {
-    /*$.ajax({url: "/api/map/" + key.val(),
-        type: "GET",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})*/
+    map.get(key.val(), cbfunc)
   })
 
   $("button:contains('Set')").click(function() {
-    $.ajax({url: "/api/map/" + key.val(),
-        type: "POST",
-        headers: {"X-udata-namespace": namespace},
-        data: {value: value.val()},
-        success: successfunc,
-        error: errorfunc})
+    map.set(key.val(), value.val(), cbfunc)
   })
 
   $("button:contains('Delete Item')").click(function() {
-    $.ajax({url: "/api/map/" + key.val(),
-        type: "DELETE",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    map.delete(key.val(), cbfunc)
   })
 
   $("button:contains('List Keys')").click(function() {
-    $.ajax({url: "/api/map",
-        type: "GET",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    map.list(cbfunc)
   })
 
 
   /*
    * Objects
    */
+  var objects = connection.objects();
   var container = $("input[placeholder=Container]");
+  var objectname = $("input[placeholder=Object]");
   function objectpath() {
     return container.val() + "/" + encodeURIComponent($("input[placeholder=Object]").val().replace(/\./g, "&dot;"))
   }
   $("button:contains('Download')").click(function() {
-    $.ajax({url: "/api/object/" + objectpath(),
-        type: "GET",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    objects.download(container.val(), objectname.val(), cbfunc)
   })
 
   $("button:contains('Upload')").click(function() {
-    $.ajax({url: "/api/object/" + objectpath(),
-        type: "POST",
-        headers: {"X-udata-namespace": namespace},
-        contentType: false,
-        processData: false,
-        data: data.val(),
-        success: successfunc,
-        error: errorfunc})
+    objects.upload(container.val(), objectname.val(), data.val(), cbfunc)
   })
 
   $("button:contains('Delete Object')").click(function() {
-    $.ajax({url: "/api/object/" + objectpath(),
-        type: "DELETE",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    objects.delete(container.val(), objectname.val(), cbfunc)
   })
 
   $("button:contains('List Containers')").click(function() {
-    $.ajax({url: "/api/object",
-        type: "GET",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    objects.list_containers(cbfunc)
   })
 
   $("button:contains('List Objects')").click(function() {
-    $.ajax({url: "/api/object/" + container.val(),
-        type: "GET",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    objects.list_objects(container.val(), cbfunc)
   })
 
   /*
    * Database
    */
-  $("button:contains('Query')").click(function() {
-    $.ajax({url: "/api/db",
-        type: "POST",
-        data: {sql: sql.val()},
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+  var db = connection.database()
+  $("button:contains('Query w/ Results')").click(function() {
+    db.query(sql.val(), {}, cbfunc)
+  })
+
+  $("button:contains('Batch Query')").click(function() {
+    db.batch(sql.val(), {}, cbfunc)
+  })
+
+  $("button:contains('Delete Database')").click(function() {
+    db.delete(cbfunc)
   })
 
   $("button:contains('Schema')").click(function() {
-    $.ajax({url: "/api/db/schema",
-        type: "GET",
-        headers: {"X-udata-namespace": namespace},
-        success: successfunc,
-        error: errorfunc})
+    db.schema(cbfunc)
   })
 
   $("button:contains('Push')").click(function() {
