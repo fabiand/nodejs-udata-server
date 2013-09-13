@@ -93,6 +93,7 @@
 
     <script src="assets/jquery-2.0.3.min.js" type="text/javascript"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/udata.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
   var namespace = "com.example.nosql",
@@ -112,12 +113,14 @@ $(document).ready(function() {
     $("#reply").text(err.responseText)
   }
 
+  var api = udata.API(),
+    connection = api.create_connection();
   $("button:contains('Get')").click(function() {
-    $.ajax({url: "/api/map/" + key.val(),
+    /*$.ajax({url: "/api/map/" + key.val(),
         type: "GET",
         headers: {"X-udata-namespace": namespace},
         success: successfunc,
-        error: errorfunc})
+        error: errorfunc})*/
   })
 
   $("button:contains('Set')").click(function() {
