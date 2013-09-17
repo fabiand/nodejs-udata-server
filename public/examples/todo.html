@@ -15,16 +15,19 @@
       <div class="row">
         <div class="span8">
             <legend>Not yet done</legend>
+            <div id="alert-target"></div>
             <table id="tasks" class="table">
               <thead>
-                <tr><td>
-            <form class="form-inline"">
-              <div class="input-append">
-                <input id="task" type="text" class="span6" placeholder="Task"/>
-                <button id="add-task" type="submit" class="btn btn-primary">Add</button>
-              </div>
-            </form>
-                </td></tr>
+                <tr>
+                  <td>
+                    <form class="form-inline"">
+                      <div class="input-append">
+                        <input id="task" type="text" class="span6" placeholder="Task"/>
+                        <button id="add-task" type="submit" class="btn btn-primary">Add</button>
+                      </div>
+                    </form>
+                  </td>
+                </tr>
               </thead>
               <tbody>
               </tbody>
@@ -39,35 +42,32 @@
     <script src="/assets/udata.js"></script>
 <script type="text/javascript;version=1.8">
 $(document).ready(function() {
-  var namespace = "com.example.nosql",
+  var namespace = document.location.search || "com.example.nosql",
       apikey = "unused",
       form = $("form"),
+      settings = $("#settings"),
       tasks = $("#tasks"),
       task = $("#task"),
       add_task = $("#add-task"),
-      spinner = $("<i class='icon-spinner icon-spin icon-large'></i>");
+      spinner = $("<i class='icon-spinner icon-spin icon-large'></i>"),
+      alert_target = $("#alert-target");
 
-  function successfunc(data) {
-    console.log("Retrieved: " + data)
-    $("#reply").text(JSON.stringify(data))
-  }
-
-  function errorfunc(err) {
+  function showError(err) {
     console.log("Error: " + JSON.stringify(err))
     console.log(err)
-    $("#reply").text(err)
-  }
-
-  function cbfunc(err, data) {
-    if (err) errorfunc(err)
-    else successfunc(data)
+    let alert = $("<div class='alert alert-danger'>");
+    let dismiss_btn = $('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>')
+    alert_target.append(alert.text(err))
+    alert.append(dismiss_btn)
   }
 
   var api = udata.API();
 
   var connection = api.create_connection("/", namespace, apikey, function(opts, cb) {
-    opts.success = function(data) cb(undefined, data)
-    opts.error = function(xhr, err, errt) cb(errt)
+    if (cb) {
+      opts.success = function(data) cb(undefined, data)
+      opts.error = function(xhr, err, errt) cb(errt, undefined)
+    }
     $.ajax(opts)
   });
 
@@ -75,9 +75,14 @@ $(document).ready(function() {
 
   form.submit(function() {
     console.log("Submit")
+    if (!task.val()) {
+      showError("Please enter a task")
+      return false
+    }
     add_task.attr("disabled", "disabled")
     add_task.html(spinner.clone());
     map.set(randomUUID(), task.val(), function(err) {
+      if (err) showError(err);
       task.val("");
       task.focus();
       add_task.removeAttr("disabled")
@@ -87,6 +92,7 @@ $(document).ready(function() {
   })
 
   map.list(function(err, keys) {
+    if (err) showError(err);
     for(let idx in keys) {
       let key = keys[idx];
       map.get(key, function(err, val) {
