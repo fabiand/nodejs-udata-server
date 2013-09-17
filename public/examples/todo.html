@@ -21,7 +21,7 @@
             <form class="form-inline"">
               <div class="input-append">
                 <input id="task" type="text" class="span6" placeholder="Task"/>
-                <button id="add-task" type="button" class="btn btn-primary">Add</button>
+                <button id="add-task" type="submit" class="btn btn-primary">Add</button>
               </div>
             </form>
                 </td></tr>
@@ -37,13 +37,15 @@
     <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="/assets/randomUUID.js" type="text/javascript"></script>
     <script src="/assets/udata.js"></script>
-<script type="text/javascript">
+<script type="text/javascript;version=1.8">
 $(document).ready(function() {
   var namespace = "com.example.nosql",
+      apikey = "unused",
+      form = $("form"),
       tasks = $("#tasks"),
       task = $("#task"),
       add_task = $("#add-task"),
-      spinner_tpl = "<i class='icon-spinner icon-spin icon-large'></i>";
+      spinner = $("<i class='icon-spinner icon-spin icon-large'></i>");
 
   function successfunc(data) {
     console.log("Retrieved: " + data)
@@ -63,27 +65,30 @@ $(document).ready(function() {
 
   var api = udata.API();
 
-  var connection = api.create_connection("/", namespace, "apikey", function(opts, cb) {
+  var connection = api.create_connection("/", namespace, apikey, function(opts, cb) {
     opts.success = function(data) cb(undefined, data)
     opts.error = function(xhr, err, errt) cb(errt)
     $.ajax(opts)
   });
 
   var map = connection.map();
-  add_task.click(function() {
+
+  form.submit(function() {
+    console.log("Submit")
     add_task.attr("disabled", "disabled")
-    add_task.html($(spinner_tpl));
+    add_task.html(spinner.clone());
     map.set(randomUUID(), task.val(), function(err) {
       task.val("");
       task.focus();
       add_task.removeAttr("disabled")
       add_task.text("Add")
     })
+    return false; /* To prevent the default submission */
   })
 
   map.list(function(err, keys) {
-    for(var idx in keys) {
-      var key = keys[idx];
+    for(let idx in keys) {
+      let key = keys[idx];
       map.get(key, function(err, val) {
         console.log(err, idx, key, val)
         showTask(key, val);
@@ -92,7 +97,7 @@ $(document).ready(function() {
   })
 
   function showTask(key, val) {
-    var row = $("<tr>").attr("id", key),
+    let row = $("<tr>").attr("id", key),
         col = $("<td>").text(val),
         btn = $("<button>").addClass("close").html("&times;"),
         col_btn = $("<td>");
@@ -100,7 +105,7 @@ $(document).ready(function() {
     row.append(col).append(col_btn);
     tasks.find("tbody").append(row);
     btn.click(function() {
-      btn.replaceWith($(spinner_tpl))
+      btn.replaceWith(spinner.clone())
       map.delete(key, function(err) {
         console.log("deleted")
       });
@@ -109,10 +114,10 @@ $(document).ready(function() {
 
   var evtSource = new EventSource("/api/event/request");
   evtSource.addEventListener("request", function(e) {
-    var obj = JSON.parse(e.data)
+    let obj = JSON.parse(e.data)
     console.log("EVENT " + JSON.stringify(obj))
 
-    var key = obj.url.split("/")[3];
+    let key = obj.url.split("/")[3];
     if (obj.method == "POST") {
       map.get(key, function(err, val) {
         console.log("add", key, val)
