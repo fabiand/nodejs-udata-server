@@ -118,6 +118,12 @@ $(document).ready(function() {
     });
   }
 
+  function playSound(isnew) {
+    /* Shamelessly taken from GNOME 3 */
+    let audio = new Audio("/assets/glass.ogg")
+    audio.play()
+  }
+
   var evtSource = new EventSource("/api/event/request");
   evtSource.addEventListener("request", function(e) {
     let obj = JSON.parse(e.data)
@@ -128,6 +134,7 @@ $(document).ready(function() {
       map.get(key, function(err, val) {
         console.log("add", key, val)
         showTask(key, val);
+        playSound();
       })
     }
     if (obj.method == "DELETE") {
