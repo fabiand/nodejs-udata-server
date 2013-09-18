@@ -6,32 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
   <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/assets/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+  <link href="/assets/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
   <link href="/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
   </head>
   <body>
 
     <div class="container">
+      <h1>Darling, remember …</h1>
       <div class="row">
         <div class="span8">
-            <legend>Not yet done</legend>
-            <div id="alert-target"></div>
-            <table id="tasks" class="table">
-              <thead>
-                <tr>
-                  <td>
-                    <form class="form-inline"">
-                      <div class="input-append">
-                        <input id="task" type="text" class="span6" placeholder="Task"/>
+          <div id="alert-target"></div>
+          <table id="tasks" class="table">
+            <thead>
+              <tr>
+                <th colspan="2">
+                  <form>
+                    <div class="input-group">
+                      <input id="task" type="text" class="form-control" placeholder="Task"/>
+                      <span class="input-group-btn">
                         <button id="add-task" type="submit" class="btn btn-primary">Add</button>
-                      </div>
-                    </form>
-                  </td>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>
+                      </span>
+                    </div>
+                  </form>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -105,8 +107,8 @@ $(document).ready(function() {
   function showTask(key, val) {
     let row = $("<tr>").attr("id", key),
         col = $("<td>").text(val),
-        btn = $("<button>").addClass("close").html("&times;"),
-        col_btn = $("<td>");
+        btn = $("<button class='close'>&times;</button>"),
+        col_btn = $("<td class='close'>");
     col_btn.append(btn);
     row.append(col).append(col_btn);
     tasks.find("tbody").append(row);

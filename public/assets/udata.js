@@ -48,6 +48,10 @@ udata.API = function() {
         return new Database(this);
     }
 
+    Connection.prototype.pubsub = function () {
+        return new PubSub(this);
+    }
+
     /*
      * Map
      */
@@ -184,22 +188,36 @@ udata.API = function() {
         var options = {
             type: "GET",
         }
-        this.connection.request(join_paths(this.path, "/schema"), options, callback);
+        this.connection.request(join_paths(this.path, "schema"), options, callback);
     }
 
     /*
-     * Events
+     * PubSub
      */
-    var Events = function Events() {
-        this.path = "/api/events"
+    var PubSub = function PubSub(connection) {
+        this.path = "/api/pubsub"
+        this.connection = connection
     }
 
-    Events.prototype.subscribe = function events_subscribe(eventname) {
-
+    PubSub.prototype._channel_url = function(channel) {
+        /*
+         * We need to pass the namespace via a query param, becausecustom headers
+         * can not be specififed in SSE
+         */
+        return join_paths(this.path, channel) + "?namespace=" + this.connection.namespace;
     }
 
-    Events.prototype.emit = function events_emit(eventname, data) {
+    PubSub.prototype.subscribe = function pubsub_subscribe(channel, callback) {
+        // https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events
+        return new EventSource(this._channel_url(channel));
+    }
 
+    PubSub.prototype.publish = function pubsub_publish(channel, data, callback) {
+        var options = {
+            type: "POST",
+            data: {data: data},
+        }
+        this.connection.request(this._channel_url(channel), options, callback);
     }
 
     var exports = {}
