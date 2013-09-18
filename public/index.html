@@ -196,6 +196,22 @@ $(document).ready(function() {
     db.schema(cbfunc)
   })
 
+  /*
+   * PubSub
+   */
+  var pubsub = connection.pubsub()
+  $("button:contains('Publish')").click(function() {
+    pubsub.publish(channel.val(), message.val(), cbfunc)
+  })
+
+  $("button:contains('Subscribe')").click(function() {
+    var eventsrc = pubsub.subscribe(channel.val(), cbfunc)
+    eventsrc.onmessage = function (msg) {
+      pubsub_target.val(msg.data)
+    }
+  })
+
+
   $("button:contains('Push')").click(function() {
     $.ajax({url: "/push",
         type: "POST",
