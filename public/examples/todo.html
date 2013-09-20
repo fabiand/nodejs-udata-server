@@ -22,7 +22,7 @@
                 <th colspan="2">
                   <form>
                     <div class="input-group">
-                      <input id="task" type="text" class="form-control" placeholder="Task"/>
+                      <input id="task" type="text" class="form-control" placeholder="Task" autocomplete="off"/>
                       <span class="input-group-btn">
                         <button id="add-task" type="submit" class="btn btn-primary">Add</button>
                       </span>
@@ -73,7 +73,8 @@ $(document).ready(function() {
     $.ajax(opts)
   });
 
-  var map = connection.map();
+  var map = connection.map(),
+      pubsub_items = connection.pubsub().subscribe("todo-items");
 
   form.submit(function() {
     console.log("Submit")
@@ -83,12 +84,14 @@ $(document).ready(function() {
     }
     add_task.attr("disabled", "disabled")
     add_task.html(spinner.clone());
-    map.set(randomUUID(), task.val(), function(err) {
+    var key = randomUUID();
+    map.set(key, task.val(), function(err) {
       if (err) showError(err);
       task.val("");
       task.focus();
       add_task.removeAttr("disabled")
       add_task.text("Add")
+      pubsub_items.publish("item-added", {key: key})
     })
     return false; /* To prevent the default submission */
   })
@@ -98,7 +101,7 @@ $(document).ready(function() {
     for(let idx in keys) {
       let key = keys[idx];
       map.get(key, function(err, val) {
-        console.log(err, idx, key, val)
+        console.log("reading item", err, idx, key, val)
         showTask(key, val);
       })
     }
@@ -116,6 +119,7 @@ $(document).ready(function() {
       btn.replaceWith(spinner.clone().addClass("close"))
       map.delete(key, function(err) {
         console.log("deleted")
+        pubsub_items.publish("item-deleted", {key: key})
       });
     });
   }
@@ -126,23 +130,27 @@ $(document).ready(function() {
     audio.play()
   }
 
-  var evtSource = new EventSource("/api/event/request");
-  evtSource.addEventListener("request", function(e) {
+  pubsub_items.addEventListener("item-added", function(e) {
     let obj = JSON.parse(e.data)
-    console.log("EVENT " + JSON.stringify(obj))
+    console.log("ADDED " + JSON.stringify(obj))
+    let key = obj.data.key
+    console.log("KEY " + key)
 
-    let key = obj.url.split("/")[3];
-    if (obj.method == "POST") {
-      map.get(key, function(err, val) {
-        console.log("add", key, val)
-        showTask(key, val);
-        playSound();
-      })
-    }
-    if (obj.method == "DELETE") {
-      console.log("del", key)
-      tasks.find("#" + key).remove()
-    }
+    map.get(key, function(err, val) {
+      console.log("add", key, val)
+      showTask(key, val);
+      playSound();
+    })
+  })
+
+  pubsub_items.addEventListener("item-deleted", function(e) {
+    let obj = JSON.parse(e.data)
+    console.log("DEL " + JSON.stringify(obj))
+    let key = obj.data.key
+    console.log("KEY " + key)
+
+    console.log("del", key)
+    tasks.find("#" + key).remove()
   })
 
 })
