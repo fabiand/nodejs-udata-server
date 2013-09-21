@@ -130,7 +130,7 @@ $(document).ready(function() {
     audio.play()
   }
 
-  pubsub_items.addEventListener("item-added", function(e) {
+  pubsub_items.on("item-added", function(e) {
     let obj = JSON.parse(e.data)
     console.log("ADDED " + JSON.stringify(obj))
     let key = obj.data.key
@@ -143,7 +143,7 @@ $(document).ready(function() {
     })
   })
 
-  pubsub_items.addEventListener("item-deleted", function(e) {
+  pubsub_items.on("item-deleted", function(e) {
     let obj = JSON.parse(e.data)
     console.log("DEL " + JSON.stringify(obj))
     let key = obj.data.key
