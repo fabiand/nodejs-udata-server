@@ -65,7 +65,7 @@ $(document).ready(function() {
 
   var api = udata.API();
 
-  var connection = api.create_connection("/", namespace, apikey, function(opts, cb) {
+  var connection = api.create_connection("/", namespace, apikey, function req_handler(opts, cb) {
     if (cb) {
       opts.success = function(data) cb(undefined, data)
       opts.error = function(xhr, err, errt) cb(errt, undefined)
@@ -73,8 +73,70 @@ $(document).ready(function() {
     $.ajax(opts)
   });
 
-  var map = connection.map(),
-      pubsub_items = connection.pubsub().subscribe("todo-items");
+
+  /*
+   * TodoList Model
+   */
+  var TodoList = function(connection) {
+    console.log("Instantiatig new TodoList")
+
+    this.map = connection.map();
+    this.events = connection.pubsub().subscribe("todo-items");;
+  }
+  TodoList.EVENT_ADDED = "item-added"
+  TodoList.EVENT_DELETED = "item-deleted"
+
+  TodoList.prototype.items = function(callback) {
+    console.log("Listing all TodoList items")
+    var todolist = this
+    this.map.list(function(err, keys) {
+      if (err) callback(err)
+      for(let idx in keys) {
+        let key = keys[idx];
+        todolist.item(key, function(err, val) {
+          callback(err, key, val);
+        })
+      }
+    })
+  }
+
+  TodoList.prototype.item = function(key, callback) {
+    console.log("Getting one TodoList item")
+    var todolist = this
+    this.map.get(key, function(err, val) {
+      callback(err, val)
+    })
+  }
+
+  TodoList.prototype.add = function(task_desc, callback) {
+    console.log("Adding new item to TodoList: " + task_desc)
+    var todolist = this
+    var key = randomUUID();
+    this.map.set(key, task_desc, function(err) {
+      callback(err, key)
+      todolist.events.publish(TodoList.EVENT_ADDED, {key: key})
+    })
+  }
+
+  TodoList.prototype.delete = function(key, callback) {
+    console.log("Deleting a TodoList item: " + key)
+    var todolist = this
+    this.map.delete(key, function(err) {
+      callback(err, key)
+      todolist.events.publish(TodoList.EVENT_DELETED, {key: key})
+    });
+  }
+
+  TodoList.prototype.on = function(eventname, callback) {
+    console.log("Attaching new TodoList event: " + eventname)
+    this.events.on(eventname, callback)
+  }
+
+
+  /*
+   * UI Controller
+   */
+  var todolist = new TodoList(connection);
 
   form.submit(function() {
     console.log("Submit")
@@ -84,27 +146,21 @@ $(document).ready(function() {
     }
     add_task.attr("disabled", "disabled")
     add_task.html(spinner.clone());
-    var key = randomUUID();
-    map.set(key, task.val(), function(err) {
+
+    todolist.add(task.val(), function(err, key) {
       if (err) showError(err);
       task.val("");
       task.focus();
       add_task.removeAttr("disabled")
       add_task.text("Add")
-      pubsub_items.publish("item-added", {key: key})
     })
     return false; /* To prevent the default submission */
   })
 
-  map.list(function(err, keys) {
+  todolist.items(function(err, key, val) {
+    console.log("reading item", err, key, val)
     if (err) showError(err);
-    for(let idx in keys) {
-      let key = keys[idx];
-      map.get(key, function(err, val) {
-        console.log("reading item", err, idx, key, val)
-        showTask(key, val);
-      })
-    }
+    showTask(key, val);
   })
 
   function showTask(key, val) {
@@ -117,33 +173,26 @@ $(document).ready(function() {
     tasks.find("tbody").append(row);
     btn.click(function() {
       btn.replaceWith(spinner.clone().addClass("close"))
-      map.delete(key, function(err) {
+      todolist.delete(key, function(err) {
         console.log("deleted")
-        pubsub_items.publish("item-deleted", {key: key})
       });
     });
   }
 
-  function playSound(isnew) {
-    /* Shamelessly taken from GNOME 3 */
-    let audio = new Audio("glass.ogg")
-    audio.play()
-  }
-
-  pubsub_items.on("item-added", function(e) {
+  todolist.on(TodoList.EVENT_ADDED, function(e) {
     let obj = JSON.parse(e.data)
     console.log("ADDED " + JSON.stringify(obj))
     let key = obj.data.key
     console.log("KEY " + key)
 
-    map.get(key, function(err, val) {
+    todolist.item(key, function(err, val) {
       console.log("add", key, val)
       showTask(key, val);
-      playSound();
+      (new Audio("glass.ogg")).play()
     })
   })
 
-  pubsub_items.on("item-deleted", function(e) {
+  todolist.on(TodoList.EVENT_DELETED, function(e) {
     let obj = JSON.parse(e.data)
     console.log("DEL " + JSON.stringify(obj))
     let key = obj.data.key
