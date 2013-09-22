@@ -45,8 +45,8 @@
     <script src="../assets/hmac.js" type="text/javascript"></script>
 <script type="text/javascript;version=1.8">
 $(document).ready(function() {
-  var namespace = document.location.search || "com.example.nosql",
-      apikey = "unused",
+  var namespace = document.location.search || "com.example.todo",
+      apikey = "I'm lame if I use this key in production",
       form = $("form"),
       settings = $("#settings"),
       tasks = $("#tasks"),
@@ -75,7 +75,7 @@ $(document).ready(function() {
   }, new function signer() {
     this.sign = function(data) {
         var hmac = makeHMAC()(apikey, data)
-        console.log("SIgned with " + hmac)
+        console.log("Signed '" + data + "' with " + hmac)
         return hmac;
     }
   });
