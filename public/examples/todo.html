@@ -242,9 +242,20 @@ $(document).ready(function() {
         var notification = new Notification(txt);
       });
     }
-
   }
 
+
+  function install() {
+    var request = navigator.mozApps.install("http://todo.pepperocini.org:3000/examples/manifest.webapp");
+    request.onsuccess = function() {
+      notify("The TodoList has been installed.")
+    };
+    request.onerror = function() {
+      notify("Oops - The TodoList could not be installed.")
+    };
+  }
+
+  install()
 })
 </script>
 
