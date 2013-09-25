@@ -2,37 +2,40 @@
 <html>
   <head>
     <title>Your List</title>
-    <met charset="utf-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="../assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="../assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
   </head>
+
   <body>
-
-    <div class="container">
-      <h1>Darling, remember …</h1>
-      <div class="row span8">
-        <div id="alert-target"></div>
-        <form role="form">
-          <div class="input-group">
-            <input id="task" type="text" class="form-control" placeholder="Task" autocomplete="off"/>
-            <span class="input-group-btn">
-              <button id="add-task" type="submit" class="btn btn-primary">Add</button>
-            </span>
-          </div>
-        </form>
+    <main role="main">
+      <div class="container">
+        <h1>Darling, remember …</h1>
+        <div class="row col-md-9">
+          <div id="alert-target"></div>
+          <form role="form">
+            <div class="input-group">
+              <input id="task" type="text" class="form-control" placeholder="Task" autocomplete="off"/>
+              <span class="input-group-btn">
+                <button id="add-task" type="submit" class="btn btn-primary">Add</button>
+              </span>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
 
-    <div class="container">
-      <div class="row span8">
-<p>
-        <ul id="tasks" class="list-group">
-        </ul>
-</p>
-    </div>
+      <div class="container">
+        <div class="row col-md-9">
+          <p>
+            <ul id="tasks" class="list-group">
+            </ul>
+          </p>
+        </div>
+      </div>
+    </main>
 
     <script src="../assets/jquery-2.0.3.min.js" type="text/javascript"></script>
     <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
