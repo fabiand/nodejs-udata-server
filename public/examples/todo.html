@@ -190,7 +190,7 @@ $(document).ready(function() {
   })
 
   function showTask(key, val) {
-    val = val.replace(/(\+?[\d]+[\d ()-]+[\d])/g, "<a target='_blank' href='callto:$&'>$&</a>")
+    val = val.replace(/(\+?[\d]+[\d ()-]+[\d])/g, "<a href='tel:$&'>$&</a>")
     let row = $("<li class='list-group-item'>").attr("id", key).html(val),
         btn = $("<button class='close'>&times;</button>");
     row.append(btn);
