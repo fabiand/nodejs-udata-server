@@ -1,0 +1,17 @@
+{
+    "version": "0.1",
+    "name": "µCloud",
+    "description": "Your Apps using your Storage",
+    "launch_path": "/examples/todo.html",
+    "icons": {
+    },
+    "developer": {
+        "name": "Fabian Deutsch",
+        "url": "http://dummdida.tumblr.com"
+    },
+    "installs_allowed_from": ["*"],
+    "default_locale": "en",
+    "permissions": {
+        "systemXHR": {}
+    }
+}
