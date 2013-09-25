@@ -187,7 +187,8 @@ $(document).ready(function() {
   })
 
   function showTask(key, val) {
-    let row = $("<li class='list-group-item'>").attr("id", key).text(val),
+    val = val.replace(/(\+?[\d]+[\d ()-]+[\d])/g, "<a target='_blank' href='callto:$&'>$&</a>")
+    let row = $("<li class='list-group-item'>").attr("id", key).html(val),
         btn = $("<button class='close'>&times;</button>");
     row.append(btn);
     tasks.append(row);
