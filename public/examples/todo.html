@@ -208,6 +208,7 @@ $(document).ready(function() {
     todolist.item(key, function(err, val) {
       console.log("add", key, val)
       showTask(key, val);
+      notify("Remember: " + val)
       (new Audio("glass.ogg")).play()
     })
   })
@@ -221,6 +222,24 @@ $(document).ready(function() {
     console.log("del", key)
     tasks.find("#" + key).remove()
   })
+
+
+  function notify(txt) {
+    if (!"Notification" in window) return false
+
+    if (Notification.permission === "granted") {
+      var notification = new Notification(txt);
+    }
+    else if (Notification.permission !== 'denied') {
+      Notification.requestPermission(function (permission) {
+        if(!('permission' in Notification)) {
+          Notification.permission = permission;
+        }
+        var notification = new Notification(txt);
+      });
+    }
+
+  }
 
 })
 </script>
