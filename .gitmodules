@@ -1,0 +1,3 @@
+[submodule "public/examples/todo"]
+	path = public/examples/todo
+	url = https://github.com/fabiand/webapp-udata-todo.git

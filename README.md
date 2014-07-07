@@ -71,10 +71,12 @@ Hands on
 
 To run the reference implementation do:
 
-    yum install nodejs-express nodejs-sqlite3
-    npm link express
-    npm link sqlite3
-    node lib/app.js
+    $ git submodule update --init
+    $ pkcon install nodejs-express nodejs-sqlite3 npm
+    $ npm link express
+    $ npm link sqlite3
+    $ node lib/app.js
 
-And point your browser to the [webinterface](http://127.0.0.1:3000).
+And point your browser to the [webinterface](http://127.0.0.1:3000/static/index.html)
+or to a [todo list example](http://127.0.0.1:3000/static/examples/todo/).
 
